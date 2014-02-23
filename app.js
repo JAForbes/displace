@@ -37,7 +37,7 @@ _(Mouse.prototype).extend(Basic.prototype,{
 
   handlers : function(){
     var that = this;
-    this.stage.$canvas.on('mousemove',function(e){
+    this.stage.$canvas.on('mousemove MSPointerMove',function(e){
       that.x = e.offsetX - that.stage.$canvas.width()/2;
       that.y = e.offsetY - that.stage.$canvas.height()/2;
     });
