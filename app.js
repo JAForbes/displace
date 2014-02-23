@@ -174,7 +174,7 @@ _(Box.prototype).extend(Basic.prototype,{
 
 
 $(function(){
-  stage = new Stage({width_ratio:0.9, height_ratio:0.9});
+  stage = new Stage({width_ratio:0.8, height_ratio:0.8});
   box = new Box({stage:stage});
   stage.on('tick',function(){
     box.setTarget(stage.mouse);
