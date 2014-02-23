@@ -158,16 +158,21 @@ _(Box.prototype).extend(Basic.prototype,{
   },
 
   move: function(){
-    this.x += this.vx;
-    this.y += this.vy;
-    var theta = utils.radiansFromCartesian(utils.distanceAsCartesian(this,this.target));
-    var u = utils.cartesianFromRadians(theta);
-    this.vx = u.x*this.acceleration;
-    this.vy = u.y*this.acceleration;
+    if(utils.distance(this,this.target) > this.width){
+      this.x += this.vx;
+      this.y += this.vy;
+      var theta = utils.radiansFromCartesian(utils.distanceAsCartesian(this,this.target));
+      var u = utils.cartesianFromRadians(theta);
+      this.vx = u.x*this.acceleration;
+      this.vy = u.y*this.acceleration;
+    } else {
+      vx = 0;
+      vy = 0;
+    }
   },
 
   draw: function(){
-    this.stage.context.fillRect(this.x,this.y,this.width,this.height);
+    this.stage.context.fillRect(this.x-this.width/2,this.y-this.height/2,this.width,this.height);
   },
 
 });
