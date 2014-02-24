@@ -145,7 +145,10 @@ _(Box.prototype).extend(Basic.prototype,{
     target: { x:0,y:0 },
     width: 20,
     height: 20,
-    acceleration: 4
+    speed: 4,
+    stamina: 1,
+    stamina_decrement : 0.0015,
+    stamina_increment : 0.0015
   },
 
   initialize: function(){
@@ -163,21 +166,38 @@ _(Box.prototype).extend(Basic.prototype,{
     this.draw();
   },
 
+  tire: function(){
+    if(this.stamina > 0.2){
+      this.stamina -= this.stamina_decrement;
+    }
+    return this.stamina;
+  },
+
+  rest: function(){
+    if(this.stamina < 1){
+      this.stamina += this.stamina_increment;
+    }
+    return this.stamina;
+  },
+
   move: function(){
-    if(utils.distance(this,this.target) > this.width){
+    if(utils.distance(this,this.target) > 50){
       this.x += this.vx;
       this.y += this.vy;
       var theta = utils.radiansFromCartesian(utils.distanceAsCartesian(this,this.target));
       var u = utils.cartesianFromRadians(theta);
-      this.vx = u.x*this.acceleration;
-      this.vy = u.y*this.acceleration;
+      this.vx = u.x*this.speed * this.stamina;
+      this.vy = u.y*this.speed * this.stamina;
+      this.tire();
     } else {
       vx = 0;
       vy = 0;
+      this.rest();
     }
   },
 
   draw: function(){
+    this.stage.context.fillStyle = 'rgb('+Math.floor(255*(1-this.stamina))+','+Math.floor(255*(this.stamina))+',0)';
     this.stage.context.fillRect(this.x-this.width/2,this.y-this.height/2,this.width,this.height);
   },
 
@@ -190,8 +210,8 @@ $(function(){
   other = new Box({stage:stage});
   stage.on('tick',function(){
     box.setTarget(stage.mouse);
-    if(utils.distance(box,other.target) < 100){
-      other.setTarget({x:utils.random((stage.width/2)*0.9),y:utils.random((stage.height/2)*0.9)});
-    }
+    if(utils.distance(box,other.target) < 200){
+      other.setTarget({x:utils.random(200),y:utils.random(200)});
+    } 
   },this);
 });
