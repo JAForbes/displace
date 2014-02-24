@@ -191,8 +191,7 @@ $(function(){
   stage.on('tick',function(){
     box.setTarget(stage.mouse);
     if(utils.distance(box,other.target) < 100){
-      other.setTarget({x:utils.random(stage.width/2),y:utils.random(stage.height/2)});
-      console.log('nearby');
+      other.setTarget({x:utils.random((stage.width/2)*0.9),y:utils.random((stage.height/2)*0.9)});
     }
   },this);
 });
