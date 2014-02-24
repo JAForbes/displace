@@ -36,4 +36,12 @@ utils = {
     ys = ys * ys;
     return Math.sqrt(xs + ys);
   },
+
+  /*Positive and negative numbers in a given boundary*/
+  random: function(boundary){
+    boundary = boundary || 1;
+    return Math.random()*boundary*(Math.random()>0.5 ? 1 : -1);
+  },
+
+
 };
