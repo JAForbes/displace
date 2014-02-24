@@ -37,7 +37,7 @@ _(Mouse.prototype).extend(Basic.prototype,{
 
   handlers : function(){
     var that = this;
-    this.stage.$canvas.on('mousemove MSPointerMove',function(e){
+    this.stage.$canvas.on('mousemove MSPointerMove touchmove',function(e){
       that.x = e.offsetX - that.stage.$canvas.width()/2;
       that.y = e.offsetY - that.stage.$canvas.height()/2;
     });
@@ -63,6 +63,8 @@ _(Stage.prototype).extend(Basic.prototype, {
     background_color: '#EEE',//css color of canvas element
     className: 'stage',
     tickRate: 1000/60, //60 fps
+    width:0,
+    height:0,
   },
 
   initialize: function(options){
@@ -105,10 +107,12 @@ _(Stage.prototype).extend(Basic.prototype, {
   },
 
   resize: function(){
+    this.width = this.$parent.width()*this.width_ratio;
+    this.height = this.$parent.height()*this.height_ratio;
     this.$canvas
       .prop({
-        width:this.$parent.width()*this.width_ratio,
-        height:this.$parent.height()*this.height_ratio
+        width:this.width,
+        height:this.height
       });
     this.center();
     this.trigger('tick');
@@ -127,6 +131,8 @@ _(Stage.prototype).extend(Basic.prototype, {
 
 });
 
+
+/* A  Box That Moves Towards a target. */
 function Box(options){ Basic.call(this,options); }
 _(Box.prototype).extend(Basic.prototype,{
   
@@ -181,7 +187,12 @@ _(Box.prototype).extend(Basic.prototype,{
 $(function(){
   stage = new Stage({width_ratio:0.8, height_ratio:0.8});
   box = new Box({stage:stage});
+  other = new Box({stage:stage});
   stage.on('tick',function(){
     box.setTarget(stage.mouse);
+    if(utils.distance(box,other.target) < 100){
+      other.setTarget({x:utils.random(stage.width/2),y:utils.random(stage.height/2)});
+      console.log('nearby');
+    }
   },this);
 });
