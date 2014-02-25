@@ -23,7 +23,8 @@ _(Basic.prototype).extend(Events,{ defaults : {}, initialize: function(options){
 
 
 function Mouse(options){ Basic.call(this,options); }
-_(Mouse.prototype).extend(Basic.prototype,{
+Mouse.prototype = Object.create(Basic.prototype);
+_(Mouse.prototype).extend({
   
   defaults: {
     stage : undefined,
@@ -54,8 +55,8 @@ _(Mouse.prototype).extend(Basic.prototype,{
 */
 
 function Stage(options){ Basic.call(this,options); }
-
-_(Stage.prototype).extend(Basic.prototype, {
+Stage.prototype = Object.create(Basic.prototype);
+_(Stage.prototype).extend({
   defaults : {
     width_ratio:1,
     height_ratio:1,
@@ -134,7 +135,8 @@ _(Stage.prototype).extend(Basic.prototype, {
 
 /* A  Box That Moves Towards a target. */
 function Box(options){ Basic.call(this,options); }
-_(Box.prototype).extend(Basic.prototype,{
+Box.prototype = Object.create(Basic.prototype);
+_(Box.prototype).extend({
   
   defaults: {
     stage : undefined,
@@ -142,13 +144,10 @@ _(Box.prototype).extend(Basic.prototype,{
     y: 0,
     vx: 0,
     vy: 0,
-    target: { x:0,y:0 },
     width: 20,
     height: 20,
     speed: 4,
-    stamina: 1,
-    stamina_decrement : 0.0015,
-    stamina_increment : 0.0015
+    color: 'blue'
   },
 
   initialize: function(){
@@ -157,13 +156,38 @@ _(Box.prototype).extend(Basic.prototype,{
     },this);
   },
 
-  setTarget: function(coords){
-    this.target = _(coords).pick(['x','y']);
-  },
-
   tick: function(){
     this.move();
     this.draw();
+  },
+
+  move: function(){
+    this.x += this.vx;
+    this.y += this.vy;
+  },
+
+  draw: function(){
+    this.stage.context.fillStyle = this.color;
+    this.stage.context.fillRect(this.x,this.y,this.width,this.height);
+  },
+
+});
+
+
+
+/* A  Box That Moves Towards a target. */
+function TargetBox(options){ Box.call(this,options); }
+TargetBox.prototype = Object.create(Box.prototype);
+_.extend(TargetBox.prototype.defaults,{
+    target: { x:0,y:0 },
+    stamina: 1,
+    stamina_decrement : 0.0015,
+    stamina_increment : 0.0015
+  });
+_(TargetBox.prototype).extend({
+
+  setTarget: function(coords){
+    this.target = _(coords).pick(['x','y']);
   },
 
   tire: function(){
@@ -180,6 +204,10 @@ _(Box.prototype).extend(Basic.prototype,{
     return this.stamina;
   },
 
+  changeColor: function(){
+    this.color = 'rgb('+Math.floor(255*(1-this.stamina))+','+Math.floor(255*(this.stamina))+',0)';
+  },
+
   move: function(){
     if(utils.distance(this,this.target) > 50){
       this.x += this.vx;
@@ -194,20 +222,21 @@ _(Box.prototype).extend(Basic.prototype,{
       vy = 0;
       this.rest();
     }
-  },
-
-  draw: function(){
-    this.stage.context.fillStyle = 'rgb('+Math.floor(255*(1-this.stamina))+','+Math.floor(255*(this.stamina))+',0)';
-    this.stage.context.fillRect(this.x-this.width/2,this.y-this.height/2,this.width,this.height);
+    this.changeColor();
   },
 
 });
 
+function maximiseBodyHeight(){
+  $('body').height($(window).height());
+}
 
 $(function(){
+  $(window).on('resize',maximiseBodyHeight);
+  maximiseBodyHeight();
   stage = new Stage({width_ratio:0.8, height_ratio:0.8});
-  box = new Box({stage:stage});
-  other = new Box({stage:stage});
+  box = new TargetBox({stage:stage});
+  other = new TargetBox({stage:stage});
   stage.on('tick',function(){
     box.setTarget(stage.mouse);
     if(utils.distance(box,other.target) < 200){
