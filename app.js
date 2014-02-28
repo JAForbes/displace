@@ -39,8 +39,8 @@ _(Mouse.prototype).extend({
   handlers : function(){
     var that = this;
     this.stage.$canvas.on('mousemove MSPointerMove touchmove',function(e){
-      that.x = e.offsetX - that.stage.$canvas.width()/2;
-      that.y = e.offsetY - that.stage.$canvas.height()/2;
+      that.x = e.offsetX - that.stage.translated.x;
+      that.y = e.offsetY - that.stage.translated.y;
     });
   }
 
@@ -53,6 +53,19 @@ _(Mouse.prototype).extend({
     - Fills the parent element to the specified ratio
     - Stays centered to the parent element
 */
+
+function Camera(options){ Basic.call(this,options); }
+Camera.prototype = Object.create(Basic.prototype);
+_(Camera.prototype).extend({
+  tracking: undefined,
+  stage: undefined,
+  track: function(target){
+    this.tracking = target || this.tracking;
+    if(this.tracking){
+      stage.translate(-this.tracking.x,-this.tracking.y);
+    }
+  }
+});
 
 function Stage(options){ Basic.call(this,options); }
 Stage.prototype = Object.create(Basic.prototype);
@@ -75,6 +88,14 @@ _(Stage.prototype).extend({
     $(window).resize(function(){ that.resize.call(that); });
     this.resize();
     this.resetClock();
+    this.camera = new Camera({stage:this});
+  },
+
+  translate: function(x,y){
+    this.translated = this.translated || {x:0,y:0}
+    this.translated.x+=x;
+    this.translated.y+=y;
+    this.context.translate(x,y);
   },
 
   buildCanvas: function(){
@@ -99,7 +120,8 @@ _(Stage.prototype).extend({
 
   tick: function(){
     this.clear();
-    this.context.translate(this.$canvas.width()/2,this.$canvas.height()/2);
+    this.translate(this.$canvas.width()/2,this.$canvas.height()/2);
+    this.camera.track();
     this.trigger('tick');
   },
 
@@ -108,8 +130,8 @@ _(Stage.prototype).extend({
   },
 
   resize: function(){
-    this.width = this.$parent.width()*this.width_ratio;
-    this.height = this.$parent.height()*this.height_ratio;
+    this.width = Math.floor(this.$parent.width()*this.width_ratio);
+    this.height = Math.floor(this.$parent.height()*this.height_ratio);
     this.$canvas
       .prop({
         width:this.width,
@@ -121,6 +143,7 @@ _(Stage.prototype).extend({
 
   clear: function(){
     this.$canvas[0].width = this.$canvas[0].width;
+    this.translated = {x:0,y:0};
   },
 
   center: function(){
@@ -222,6 +245,8 @@ _(TargetBox.prototype).extend({
       vy = 0;
       this.rest();
     }
+    this.x = Math.floor(this.x);
+    this.y = Math.floor(this.y);
     this.changeColor();
   },
 
@@ -231,12 +256,21 @@ function maximiseBodyHeight(){
   $('body').height($(window).height());
 }
 
+function addRandomBoxes(numberOfBoxes,radius,stage){
+  for(var i = 0; i < numberOfBoxes; i++){
+    new Box({stage:stage,x:utils.random(radius),y:utils.random(radius)});
+  }
+}
+
 $(function(){
   $(window).on('resize',maximiseBodyHeight);
   maximiseBodyHeight();
   stage = new Stage({width_ratio:0.8, height_ratio:0.8});
   box = new TargetBox({stage:stage});
   other = new TargetBox({stage:stage});
+
+  stage.camera.track(box);
+  addRandomBoxes(50,1000,stage);
   stage.on('tick',function(){
     box.setTarget(stage.mouse);
     if(utils.distance(box,other.target) < 200){
