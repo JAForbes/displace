@@ -76,7 +76,7 @@ _(Stage.prototype).extend({
     canvas_parent_selector: 'body',//jquery selector of element to contain canvas element
     background_color: '#EEE',//css color of canvas element
     className: 'stage',
-    tickRate: 1000/60, //60 fps
+    tickRate: 1000/1000, //1000 fps
     width:0,
     height:0,
   },
@@ -232,7 +232,7 @@ _(TargetBox.prototype).extend({
   },
 
   move: function(){
-    if(utils.distance(this,this.target)> 10){
+    if(utils.distance(this,this.target)> 30){
       this.x += this.vx;
       this.y += this.vy;
       var theta = utils.radiansFromCartesian(utils.distanceAsCartesian(this,this.target));
@@ -270,7 +270,7 @@ $(function(){
   other = new TargetBox({stage:stage});
 
   stage.camera.track(box);
-  addRandomBoxes(50,1000,stage);
+  addRandomBoxes(50,400,stage);
   stage.on('tick',function(){
     box.setTarget(stage.mouse);
     if(utils.distance(box,other.target) < 200){
