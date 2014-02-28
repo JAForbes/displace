@@ -62,7 +62,7 @@ _(Camera.prototype).extend({
   track: function(target){
     this.tracking = target || this.tracking;
     if(this.tracking){
-      stage.translate(-this.tracking.x,-this.tracking.y);
+      stage.context.translate(-this.tracking.x,-this.tracking.y);
     }
   }
 });
@@ -169,7 +169,7 @@ _(Box.prototype).extend({
     vy: 0,
     width: 10,
     height: 10,
-    speed: 4,
+    speed: 1,
     color: 'blue'
   },
 
@@ -191,7 +191,7 @@ _(Box.prototype).extend({
 
   draw: function(){
     this.stage.context.fillStyle = this.color;
-    this.stage.context.fillRect(this.x,this.y,this.width,this.height);
+    this.stage.context.fillRect(this.x-this.width/2,this.y-this.height/2,this.width,this.height);
   },
 
 });
@@ -232,7 +232,7 @@ _(TargetBox.prototype).extend({
   },
 
   move: function(){
-    if(utils.distance(this,this.target) > 25){
+    if(utils.distance(this,this.target)> 10){
       this.x += this.vx;
       this.y += this.vy;
       var theta = utils.radiansFromCartesian(utils.distanceAsCartesian(this,this.target));
@@ -245,8 +245,8 @@ _(TargetBox.prototype).extend({
       vy = 0;
       this.rest();
     }
-    this.x = Math.floor(this.x);
-    this.y = Math.floor(this.y);
+    this.x = this.x;
+    this.y = this.y;
     this.changeColor();
   },
 
