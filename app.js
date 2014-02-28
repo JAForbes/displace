@@ -167,8 +167,8 @@ _(Box.prototype).extend({
     y: 0,
     vx: 0,
     vy: 0,
-    width: 20,
-    height: 20,
+    width: 10,
+    height: 10,
     speed: 4,
     color: 'blue'
   },
@@ -265,7 +265,7 @@ function addRandomBoxes(numberOfBoxes,radius,stage){
 $(function(){
   $(window).on('resize',maximiseBodyHeight);
   maximiseBodyHeight();
-  stage = new Stage({width_ratio:0.8, height_ratio:0.8});
+  stage = new Stage({width_ratio:1, height_ratio:1});
   box = new TargetBox({stage:stage});
   other = new TargetBox({stage:stage});
 
