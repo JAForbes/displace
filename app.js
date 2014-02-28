@@ -34,13 +34,23 @@ _(Mouse.prototype).extend({
 
   initialize: function(){
     this.handlers();
+    this.stage.on('tick',this.tick,this);
+  },
+
+  tick: function(){
+    this.draw();
+  },
+
+  draw: function(){
+    this.stage.context.fillStyle = 'purple';
+    this.stage.context.fillRect(this.x-10,this.y-10,20,20);
   },
 
   handlers : function(){
     var that = this;
     this.stage.$canvas.on('mousemove MSPointerMove touchmove',function(e){
-      that.x = e.offsetX - that.stage.translated.x;
-      that.y = e.offsetY - that.stage.translated.y;
+      that.x = e.offsetX - stage.$canvas.width()/2 + stage.camera.tracking.x;
+      that.y = e.offsetY - stage.$canvas.height()/2 + stage.camera.tracking.y;
     });
   }
 
