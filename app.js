@@ -232,7 +232,7 @@ _(TargetBox.prototype).extend({
   },
 
   move: function(){
-    if(utils.distance(this,this.target) > 50){
+    if(utils.distance(this,this.target) > 25){
       this.x += this.vx;
       this.y += this.vy;
       var theta = utils.radiansFromCartesian(utils.distanceAsCartesian(this,this.target));
