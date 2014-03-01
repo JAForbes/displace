@@ -26,44 +26,6 @@ Basic = (function(){
 })();
 _(Basic.prototype).extend(Events,{ defaults : {}, initialize: function(options){} });
 
-
-
-function Mouse(options){ Basic.call(this,options); }
-Mouse.prototype = Object.create(Basic.prototype);
-_(Mouse.prototype).extend({
-  
-  defaults: {
-    stage : undefined,
-    x: 0,
-    y: 0
-  },
-
-  initialize: function(){
-    this.handlers();
-    this.stage.on('tick',this.tick,this);
-  },
-
-  tick: function(){
-    this.draw();
-  },
-
-  draw: function(){
-    this.stage.context.fillStyle = 'purple';
-    this.stage.context.fillRect(this.x-10,this.y-10,20,20);
-  },
-
-  handlers : function(){
-    var that = this;
-    this.stage.$canvas.on('mousemove MSPointerMove touchmove',function(e){
-      var tracking = stage.camera.tracking;
-      that.x = e.offsetX - stage.$canvas.width()/2 + (tracking && tracking.x || 0);
-      that.y = e.offsetY - stage.$canvas.height()/2 + (tracking && tracking.y || 0);
-    });
-  }
-
-});
-
-
 /*
   A Canvas Element That:
 
@@ -228,6 +190,27 @@ _(Box.prototype).extend({
     this.stage.context.fillStyle = this.color;
     this.stage.context.fillRect(this.x-this.width/2,this.y-this.height/2,this.width,this.height);
   },
+
+});
+
+
+function Mouse(options){ Box.call(this,options); }
+Mouse.prototype = Object.create(Box.prototype);
+_(Mouse.prototype).extend({
+
+  initialize: function(){
+    Box.prototype.initialize.call(this)
+    this.handlers();
+  },
+
+  handlers : function(){
+    var that = this;
+    this.stage.$canvas.on('mousemove MSPointerMove touchmove',function(e){
+      var tracking = stage.camera.tracking;
+      that.x = e.offsetX - stage.$canvas.width()/2 + (tracking && tracking.x || 0);
+      that.y = e.offsetY - stage.$canvas.height()/2 + (tracking && tracking.y || 0);
+    });
+  }
 
 });
 
