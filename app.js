@@ -1,3 +1,9 @@
+tweens = {
+  easeInQuad : function (t, b, c, d) {
+    return c*(t/=d)*t + b;
+  }
+};
+
 Basic = (function(){
 
   function Constructor(options){ 
@@ -70,11 +76,26 @@ Camera.prototype = Object.create(Basic.prototype);
 _(Camera.prototype).extend({
   tracking: undefined,
   stage: undefined,
-  zoom: 1,
+  _zoom: 1,
+
+  tick: function(){
+    this.track();
+  },
+
+  zoom: (function(){
+    var lastZoom = 1;//private
+    return function(value,duration){
+      var time = 0, begin = this._zoom, change = value - this._zoom; duration = duration || 100;
+      this.listenTo(stage,'tick',function(){
+        this._zoom = tweens.easeInQuad(time++, begin, change, duration);
+        time > duration && this.stopListening(stage);
+      },this);
+    };
+  })(), 
 
   track: function(target){
     this.tracking = target || this.tracking;
-    stage.context.scale(this.zoom,this.zoom);
+   stage.context.scale(this._zoom,this._zoom);
     if(this.tracking){
       stage.context.translate(-this.tracking.x,-this.tracking.y);
     }
@@ -135,7 +156,7 @@ _(Stage.prototype).extend({
   tick: function(){
     this.clear();
     this.translate(this.$canvas.width()/2,this.$canvas.height()/2);
-    this.camera.track();
+    this.camera.tick();
     this.trigger('tick');
   },
 
@@ -281,6 +302,8 @@ $(function(){
   box = new TargetBox({stage:stage});
   other = new TargetBox({stage:stage, stamina_decrement: 0.0012 });
 
+  stage.camera._zoom = 0;//start zoomed out
+  stage.camera.zoom(1,1000);//zoom in over 1000 ticks
   stage.camera.track(box);
   addRandomBoxes(50,400,stage);
   stage.on('tick',function(){
