@@ -49,8 +49,9 @@ _(Mouse.prototype).extend({
   handlers : function(){
     var that = this;
     this.stage.$canvas.on('mousemove MSPointerMove touchmove',function(e){
-      that.x = e.offsetX - stage.$canvas.width()/2 + stage.camera.tracking.x;
-      that.y = e.offsetY - stage.$canvas.height()/2 + stage.camera.tracking.y;
+      var tracking = stage.camera.tracking;
+      that.x = e.offsetX - stage.$canvas.width()/2 + (tracking && tracking.x || 0);
+      that.y = e.offsetY - stage.$canvas.height()/2 + (tracking && tracking.y || 0);
     });
   }
 
@@ -69,8 +70,11 @@ Camera.prototype = Object.create(Basic.prototype);
 _(Camera.prototype).extend({
   tracking: undefined,
   stage: undefined,
+  zoom: 1,
+
   track: function(target){
     this.tracking = target || this.tracking;
+    stage.context.scale(this.zoom,this.zoom);
     if(this.tracking){
       stage.context.translate(-this.tracking.x,-this.tracking.y);
     }
@@ -215,7 +219,8 @@ _.extend(TargetBox.prototype.defaults,{
     target: { x:0,y:0 },
     stamina: 1,
     stamina_decrement : 0.0015,
-    stamina_increment : 0.0015
+    stamina_increment : 0.0015,
+    friction: 0.968,
   });
 _(TargetBox.prototype).extend({
 
@@ -243,23 +248,20 @@ _(TargetBox.prototype).extend({
 
   move: function(){
     if(utils.distance(this,this.target)> 30){
-      this.x += this.vx;
-      this.y += this.vy;
       var theta = utils.radiansFromCartesian(utils.distanceAsCartesian(this,this.target));
       var u = utils.cartesianFromRadians(theta);
       this.vx = u.x*this.speed * this.stamina;
       this.vy = u.y*this.speed * this.stamina;
       this.tire();
     } else {
-      vx = 0;
-      vy = 0;
       this.rest();
-    }
-    this.x = this.x;
-    this.y = this.y;
+    }  
+    this.x += this.vx;
+    this.y += this.vy;
+    this.vx *= this.friction;
+    this.vy *= this.friction;
     this.changeColor();
   },
-
 });
 
 function maximiseBodyHeight(){
@@ -277,7 +279,7 @@ $(function(){
   maximiseBodyHeight();
   stage = new Stage({width_ratio:1, height_ratio:1});
   box = new TargetBox({stage:stage});
-  other = new TargetBox({stage:stage});
+  other = new TargetBox({stage:stage, stamina_decrement: 0.0012 });
 
   stage.camera.track(box);
   addRandomBoxes(50,400,stage);
