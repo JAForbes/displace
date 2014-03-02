@@ -167,16 +167,27 @@ _(Box.prototype).extend({
     width: 10,
     height: 10,
     speed: 1,
-    color: 'blue'
+    color: 'blue',
+    friction: 0.968,
   },
 
   initialize: function(){
+    this.handlers();
     this.stage.on('tick',function(){
       this.tick();
     },this);
   },
 
+  handlers: function(){
+  
+  },
+
+  actions: function(){
+
+  },
+
   tick: function(){
+    this.actions();
     this.move();
     this.draw();
   },
@@ -218,7 +229,57 @@ _(Mouse.prototype).extend({
 
 });
 
+Keys = new function(){
+  var active = {};
 
+  //Initialize named key codes
+    this.RETURN = this.ENTER = 13;
+    this.CTRL = this.CONTROL = 17;
+    this.SHIFT = 16;
+    this.ALT = this.OPTION = 18;
+    this[' '] = this.SPACE = 32;
+    this['~'] = this.TILDE = 126;
+
+    _.each(_.range(this.SPACE,this.TILDE),function(i){
+      this[String.fromCharCode(i)] = i;
+    },this);
+  
+  var that = this;
+  $(window).on('keydown',function(e){
+    active[e.keyCode] = active[e.keyCode] || 0;
+    active[e.keyCode]++;
+  });
+  $(window).on('keyup',function(e){
+    delete active[e.keyCode];
+  });
+
+  this.down = function(keycode){
+    return keycode in active;
+  };
+};
+
+
+function KeyboardBox(options){ Box.call(this,options); }
+KeyboardBox.prototype = Object.create(Box.prototype);
+_(KeyboardBox.prototype).extend({
+
+  actions: function(){
+    Keys.down(this.UP) && (this.vy -= this.speed/100);
+    Keys.down(this.LEFT) && (this.vx -= this.speed/100);
+    Keys.down(this.DOWN) && (this.vy += this.speed/100);
+    Keys.down(this.RIGHT) && (this.vx += this.speed/100);
+    this.vx *= this.friction;
+    this.vy *= this.friction;
+  },
+
+});
+_(KeyboardBox.prototype.defaults).extend({
+  UP: Keys.W,
+  LEFT: Keys.A,
+  RIGHT: Keys.D,
+  DOWN: Keys.S,
+  ACTION: Keys.SPACE
+});
 
 /* A  Box That Moves Towards a target. */
 function TargetBox(options){ Box.call(this,options); }
@@ -228,7 +289,6 @@ _.extend(TargetBox.prototype.defaults,{
     stamina: 1,
     stamina_decrement : 0.0015,
     stamina_increment : 0.0015,
-    friction: 0.968,
   });
 _(TargetBox.prototype).extend({
 
@@ -255,7 +315,7 @@ _(TargetBox.prototype).extend({
   },
 
   move: function(){
-    if(utils.distance(this,this.target)> 30){
+    if(this.target && utils.distance(this,this.target)> 30){
       var theta = utils.radiansFromCartesian(utils.distanceAsCartesian(this,this.target));
       var u = utils.cartesianFromRadians(theta);
       this.vx = u.x*this.speed * this.stamina;
@@ -276,9 +336,10 @@ function maximiseBodyHeight(){
   $('body').height($(window).height());
 }
 
+boxes = [];
 function addRandomBoxes(numberOfBoxes,radius,stage){
   for(var i = 0; i < numberOfBoxes; i++){
-    new Box({stage:stage,x:utils.random(radius),y:utils.random(radius)});
+    boxes.push(new Box({stage:stage,x:utils.random(radius),y:utils.random(radius)}));
   }
 }
 
@@ -293,6 +354,7 @@ $(function(){
   stage.camera.zoom(1,1000);//zoom in over 1000 ticks
   stage.camera.track(box);
   addRandomBoxes(50,400,stage);
+  other.setTarget({x:utils.random(200),y:utils.random(200)});
   stage.on('tick',function(){
     box.setTarget(stage.mouse);
     if(utils.distance(box,other.target) < 200){
