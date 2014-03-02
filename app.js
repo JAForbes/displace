@@ -207,8 +207,12 @@ _(Mouse.prototype).extend({
     var that = this;
     this.stage.$canvas.on('mousemove MSPointerMove touchmove',function(e){
       var tracking = stage.camera.tracking;
-      that.x = e.offsetX - stage.$canvas.width()/2 + (tracking && tracking.x || 0);
-      that.y = e.offsetY - stage.$canvas.height()/2 + (tracking && tracking.y || 0);
+      that.x = (-stage.$canvas.width()/2 + e.offsetX) * 1/that.stage.camera._zoom;
+      that.y = (-stage.$canvas.height()/2 + e.offsetY) * 1/that.stage.camera._zoom;
+      
+
+      that.x += tracking && tracking.x || 0
+      that.y += tracking && tracking.y || 0 
     });
   }
 
