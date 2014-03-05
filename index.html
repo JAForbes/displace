@@ -16,6 +16,16 @@
 	  	margin:0;
 	  	border:0;
 	  }
+	  canvas, img {
+      image-rendering: optimizeSpeed;
+      image-rendering: -moz-crisp-edges;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: optimize-contrast;
+      -ms-interpolation-mode: nearest-neighbor;
+      border: 5px solid #ddd;
+      /*background-color: #04a1ed;*/
+      background-color: #BBB;
+    }
 	</style>
 	<body>
 		<script src="jquery.js"></script>
@@ -25,6 +35,8 @@
 		<script src="utils.js"></script>
 		<script src="tweens.js"></script>
 		<script src="Keys.js"></script>
+		<script src="Frame.js"></script>
+		
 		<script src="Basic.js"></script>
 		<script src="Box.js"></script>
 		<script src="Mouse.js"></script>

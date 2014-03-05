@@ -57,6 +57,9 @@ _(Stage.prototype).extend({
 
   tick: function(){
     this.clear();
+    this.context.imageSmoothingEnabled = false;
+    this.context.webkitImageSmoothingEnabled = false;
+    this.context.mozImageSmoothingEnabled = false;
     this.translate(this.$canvas.width()/2,this.$canvas.height()/2);
     this.camera.tick();
     this.trigger('tick');
