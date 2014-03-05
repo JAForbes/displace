@@ -27,4 +27,7 @@ $(function(){
       other.setTarget({x:utils.random(200),y:utils.random(200)});
     } 
   },this);
+  //test framebox
+  var img = $('<img src="https://raw.github.com/JAForbes/spacetoproceed/gh-pages/img/player.png">')[0];
+  var fb = new FrameBox({stage:stage,img:img});
 });
